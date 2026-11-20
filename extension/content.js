@@ -6,6 +6,37 @@
   let cfg = null;
   let clicks = 0;
 
+  // Espera entre clicks: aleatoria entre MIN_SEG y MAX_SEG, y siempre al menos
+  // DIF_MIN s distinta de la anterior, para que nunca se repita el mismo ritmo.
+  const MIN_SEG = 1, MAX_SEG = 3, DIF_MIN = 0.3;
+  let ultimaEspera = 0;
+  function siguienteEspera() {
+    let s;
+    do s = MIN_SEG + Math.random() * (MAX_SEG - MIN_SEG);
+    while (Math.abs(s - ultimaEspera) < DIF_MIN);
+    ultimaEspera = s;
+    return s;
+  }
+
+  // Configuración incluida para sitios conocidos: se activa sola sin escribir nada.
+  // DigiIdle: cada Digimon caído es <div class="caido" data-corpo="ID"> dentro de
+  // #caidos-lista, con un <button> que lanza el scanner elegido. Solo se permite
+  // una tentativa por cuerpo, así que cada cuerpo se clickea una sola vez.
+  const PRESETS = {
+    "digiidle.com": {
+      xpath: "//div[@id='caidos-lista']/div[contains(concat(' ',normalize-space(@class),' '),' caido ') and @data-corpo]/button",
+      modo: "todos",
+      soloVisibles: false,
+      unaVez: true,
+      enabled: true,
+    },
+  };
+  const preset = Object.entries(PRESETS)
+    .find(([h]) => location.host === h || location.host.endsWith("." + h))?.[1] || null;
+
+  // Cuerpos ya clickeados (data-corpo -> momento), para no gastar dos veces en el mismo.
+  const usados = new Map();
+
   const log = (...a) => console.log("%c[XPath Auto Clicker]", "color:#0a7", ...a);
 
   // Evalúa el XPath y devuelve elementos clickeables.
@@ -47,25 +78,26 @@
       return;
     }
     els = els.filter(el => (!cfg.soloVisibles || visible(el)) && habilitado(el));
+    const ahora = Date.now();
+    for (const [id, t] of usados) if (ahora - t > 120000) usados.delete(id);
+    const idDe = el => el.closest("[data-corpo]")?.dataset.corpo;
+    if (cfg.unaVez) els = els.filter(el => !idDe(el) || !usados.has(idDe(el)));
     if (cfg.modo !== "todos") els = els.slice(0, 1);
     for (const el of els) {
+      const id = idDe(el);
+      if (id) usados.set(id, ahora);
       el.click();
       clicks++;
     }
     if (els.length) log(`click en ${els.length} elemento(s). Total: ${clicks}`);
-    if (cfg.maxClicks > 0 && clicks >= cfg.maxClicks) {
-      log("Límite de clicks alcanzado, deteniendo.");
-      chrome.storage.local.set({ [KEY]: { ...cfg, enabled: false } });
-    }
   }
 
   function programar() {
     clearTimeout(timer);
     timer = null;
     if (!cfg || !cfg.enabled) return;
-    const base = Math.max(0.2, Number(cfg.segundos) || 5) * 1000;
-    const jitter = (Number(cfg.jitter) || 0) * 1000 * Math.random();
-    timer = setTimeout(() => { tick(); programar(); }, base + jitter);
+    const seg = siguienteEspera();
+    timer = setTimeout(() => { tick(); programar(); }, seg * 1000);
   }
 
   function aplicar(nuevo) {
@@ -73,16 +105,16 @@
     cfg = nuevo || null;
     if (cfg && cfg.enabled && !estabaActivo) {
       clicks = 0;
-      log(`Activado: "${cfg.xpath}" cada ${cfg.segundos}s`);
+      log(`Activado: "${cfg.xpath}" cada ${MIN_SEG}–${MAX_SEG} s al azar`);
     } else if (!(cfg && cfg.enabled) && estabaActivo) {
       log("Detenido.");
     }
     programar();
   }
 
-  chrome.storage.local.get(KEY, r => aplicar(r[KEY]));
+  chrome.storage.local.get(KEY, r => aplicar(r[KEY] || preset));
   chrome.storage.onChanged.addListener((changes, area) => {
-    if (area === "local" && changes[KEY]) aplicar(changes[KEY].newValue);
+    if (area === "local" && changes[KEY]) aplicar(changes[KEY].newValue || preset);
   });
 
   // Mensajes desde el popup: probar XPath y obtener estado.
@@ -100,7 +132,7 @@
         responder({ ok: false, error: e.message });
       }
     } else if (msg.tipo === "estado") {
-      responder({ host: location.host, clicks, activo: !!(cfg && cfg.enabled) });
+      responder({ host: location.host, clicks, activo: !!(cfg && cfg.enabled), cfg, preset });
     }
   });
 })();

@@ -1,22 +1,20 @@
 const $ = id => document.getElementById(id);
-const campos = ["xpath", "segundos", "jitter", "maxClicks", "modo", "soloVisibles"];
+const campos = ["xpath", "modo", "soloVisibles", "unaVez"];
 let tab, KEY, cfg = {};
 
 function leerForm() {
   return {
     xpath: $("xpath").value.trim(),
-    segundos: Number($("segundos").value) || 5,
-    jitter: Number($("jitter").value) || 0,
-    maxClicks: Number($("maxClicks").value) || 0,
     modo: $("modo").value,
     soloVisibles: $("soloVisibles").checked,
+    unaVez: $("unaVez").checked,
   };
 }
 
 function pintar() {
   for (const c of campos) {
     if (cfg[c] === undefined) continue;
-    if (c === "soloVisibles") $(c).checked = cfg[c];
+    if (c === "soloVisibles" || c === "unaVez") $(c).checked = cfg[c];
     else $(c).value = cfg[c];
   }
   $("toggle").textContent = cfg.enabled ? "Detener" : "Iniciar";
@@ -51,8 +49,20 @@ async function guardar(extra = {}) {
   const host = estado.host;
   $("host").textContent = host;
   KEY = "cfg:" + host;
-  cfg = (await chrome.storage.local.get(KEY))[KEY] || {};
+  // Si no hay nada guardado, se muestra la config que usa la página (preset incluido).
+  cfg = (await chrome.storage.local.get(KEY))[KEY] || estado.cfg || {};
   pintar();
+  // En sitios con config incluida (DigiIdle) el XPath queda oculto: no hace falta tocarlo.
+  if (!estado.preset) $("campoXpath").hidden = false;
+  if (estado.preset) {
+    $("preset").hidden = false;
+    $("preset").onclick = async () => {
+      cfg = { ...estado.preset };
+      pintar();
+      await chrome.storage.local.set({ [KEY]: cfg });
+      msg("Config de DigiIdle restaurada.");
+    };
+  }
   if (estado.activo) msg(`Activo. Clicks hechos: ${estado.clicks}`);
 
   campos.forEach(c => $(c).addEventListener("change", () => guardar()));

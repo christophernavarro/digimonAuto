@@ -12,3 +12,5 @@ button.on { background: #c33; }
 button.sec { background: #e5e5e5; color: #222; }
 .msg { margin-top: 8px; min-height: 16px; font-size: 12px; }
 .err { color: #c33; }
+.nota { margin: 0 0 8px; color: #555; font-size: 12px; }
+[hidden] { display: none !important; }

@@ -8,22 +8,12 @@
   <h1>XPath Auto Clicker</h1>
   <div id="host" class="host"></div>
 
-  <label>XPath del elemento a clickear
+  <label id="campoXpath" hidden>XPath del elemento a clickear
     <textarea id="xpath" rows="3" spellcheck="false"
       placeholder="//div[@class='caido']/button"></textarea>
   </label>
 
-  <div class="fila">
-    <label>Cada (seg)
-      <input id="segundos" type="number" min="0.2" step="0.1" value="5">
-    </label>
-    <label>+ azar (seg)
-      <input id="jitter" type="number" min="0" step="0.1" value="0">
-    </label>
-    <label>Máx. clicks
-      <input id="maxClicks" type="number" min="0" step="1" value="0" title="0 = sin límite">
-    </label>
-  </div>
+  <p class="nota">Click cada 1–3 s al azar, distinto cada vez.</p>
 
   <label>Si hay varias coincidencias
     <select id="modo">
@@ -32,11 +22,13 @@
     </select>
   </label>
   <label class="check"><input id="soloVisibles" type="checkbox" checked> Solo elementos visibles</label>
+  <label class="check"><input id="unaVez" type="checkbox"> Un solo click por Digimon caído</label>
 
   <div class="botones">
-    <button id="probar" class="sec">Probar XPath</button>
+    <button id="probar" class="sec">Probar</button>
     <button id="toggle">Iniciar</button>
   </div>
+  <button id="preset" class="sec" hidden style="width:100%;margin-top:6px">Restaurar config de DigiIdle</button>
   <div id="msg" class="msg"></div>
 
   <script src="popup.js"></script>
