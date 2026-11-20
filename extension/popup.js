@@ -42,17 +42,18 @@ async function guardar(extra = {}) {
 
 (async () => {
   [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-  let host = "";
-  try { host = new URL(tab.url).host; } catch {}
-  if (!host) { msg("Esta pestaña no admite la extensión.", true); return; }
+  // El host lo informa el content script (tab.url no siempre está disponible).
+  const estado = await enviar({ tipo: "estado" });
+  if (!estado) {
+    msg("No hay conexión con la página. Recárgala (F5) e intenta de nuevo.", true);
+    return;
+  }
+  const host = estado.host;
   $("host").textContent = host;
   KEY = "cfg:" + host;
   cfg = (await chrome.storage.local.get(KEY))[KEY] || {};
   pintar();
-
-  const estado = await enviar({ tipo: "estado" });
-  if (!estado) msg("Recarga la página (F5) para activar la extensión aquí.", true);
-  else if (estado.activo) msg(`Activo. Clicks hechos: ${estado.clicks}`);
+  if (estado.activo) msg(`Activo. Clicks hechos: ${estado.clicks}`);
 
   campos.forEach(c => $(c).addEventListener("change", () => guardar()));
 

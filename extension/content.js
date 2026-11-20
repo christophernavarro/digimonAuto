@@ -100,7 +100,7 @@
         responder({ ok: false, error: e.message });
       }
     } else if (msg.tipo === "estado") {
-      responder({ clicks, activo: !!(cfg && cfg.enabled) });
+      responder({ host: location.host, clicks, activo: !!(cfg && cfg.enabled) });
     }
   });
 })();
