@@ -1,0 +1,18 @@
+{
+  "manifest_version": 3,
+  "name": "XPath Auto Clicker",
+  "version": "1.0.0",
+  "description": "Hace click automático cada X segundos en los elementos que coinciden con un XPath (configurable por sitio).",
+  "permissions": ["storage"],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "XPath Auto Clicker"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}

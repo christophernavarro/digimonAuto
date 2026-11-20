@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <h1>XPath Auto Clicker</h1>
+  <div id="host" class="host"></div>
+
+  <label>XPath del elemento a clickear
+    <textarea id="xpath" rows="3" spellcheck="false"
+      placeholder="//div[@class='caido']/button"></textarea>
+  </label>
+
+  <div class="fila">
+    <label>Cada (seg)
+      <input id="segundos" type="number" min="0.2" step="0.1" value="5">
+    </label>
+    <label>+ azar (seg)
+      <input id="jitter" type="number" min="0" step="0.1" value="0">
+    </label>
+    <label>Máx. clicks
+      <input id="maxClicks" type="number" min="0" step="1" value="0" title="0 = sin límite">
+    </label>
+  </div>
+
+  <label>Si hay varias coincidencias
+    <select id="modo">
+      <option value="todos">Clickear todas</option>
+      <option value="primero">Solo la primera</option>
+    </select>
+  </label>
+  <label class="check"><input id="soloVisibles" type="checkbox" checked> Solo elementos visibles</label>
+
+  <div class="botones">
+    <button id="probar" class="sec">Probar XPath</button>
+    <button id="toggle">Iniciar</button>
+  </div>
+  <div id="msg" class="msg"></div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+body { font: 13px system-ui, sans-serif; width: 330px; margin: 0; padding: 12px; background: #fff; color: #222; }
+h1 { font-size: 15px; margin: 0 0 4px; }
+.host { color: #777; font-size: 12px; margin-bottom: 10px; word-break: break-all; }
+label { display: block; margin-bottom: 8px; font-weight: 600; }
+textarea, input[type=number], select { width: 100%; box-sizing: border-box; margin-top: 3px; padding: 5px; font: 12px ui-monospace, monospace; border: 1px solid #bbb; border-radius: 4px; }
+.fila { display: flex; gap: 6px; }
+.fila label { flex: 1; }
+.check { font-weight: normal; display: flex; align-items: center; gap: 6px; }
+.botones { display: flex; gap: 8px; margin-top: 6px; }
+button { flex: 1; padding: 8px; border: 0; border-radius: 4px; cursor: pointer; font-weight: 600; background: #0a7; color: #fff; }
+button.on { background: #c33; }
+button.sec { background: #e5e5e5; color: #222; }
+.msg { margin-top: 8px; min-height: 16px; font-size: 12px; }
+.err { color: #c33; }
